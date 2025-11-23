@@ -50,13 +50,13 @@ export class AppComponent {
   ) { }
 
   login() {
-    this.auth.loginWithRedirect();
+    this.auth.loginWithPopup().subscribe();
   }
 
   logout() {
     this.auth.logout({
       logoutParams: { returnTo: this.document.location.origin }
-    });
+    }).subscribe();
   }
 
   callApi() {

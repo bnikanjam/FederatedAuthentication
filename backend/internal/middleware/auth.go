@@ -1,9 +1,15 @@
 package middleware
 
 import (
+	"context"
+	"log"
 	"net/http"
+	"net/url"
 	"strings"
+	"time"
 
+	"github.com/auth0/go-jwt-middleware/v2/jwks"
+	"github.com/auth0/go-jwt-middleware/v2/validator"
 	"github.com/gin-gonic/gin"
 )
 
@@ -20,6 +26,27 @@ func NewAuthMiddleware(domain, audience string) *AuthMiddleware {
 }
 
 func (m *AuthMiddleware) ValidateToken() gin.HandlerFunc {
+	issuerURL, err := url.Parse("https://" + m.Domain + "/")
+	if err != nil {
+		log.Fatalf("Failed to parse the issuer url: %v", err)
+	}
+
+	provider := jwks.NewCachingProvider(issuerURL, 5*time.Minute)
+
+	jwtValidator, err := validator.New(
+		provider.KeyFunc,
+		validator.RS256,
+		issuerURL.String(),
+		[]string{m.Audience},
+		validator.WithCustomClaims(func() validator.CustomClaims {
+			return &CustomClaims{}
+		}),
+		validator.WithAllowedClockSkew(time.Minute),
+	)
+	if err != nil {
+		log.Fatalf("Failed to set up the jwt validator: %v", err)
+	}
+
 	return func(c *gin.Context) {
 		authHeader := c.GetHeader("Authorization")
 		if authHeader == "" {
@@ -33,18 +60,23 @@ func (m *AuthMiddleware) ValidateToken() gin.HandlerFunc {
 			return
 		}
 
-		// token := parts[1]
+		tokenString := parts[1]
 
-		// TODO: Implement actual JWT validation using a library like github.com/auth0/go-jwt-middleware/v2
-		// For MVP structure, we are mocking the validation pass to ensure connectivity first.
-		// In a real implementation, we would fetch JWKS from Auth0 and validate the signature.
-
-		// MOCK VALIDATION FOR NOW to allow testing without full Auth0 setup immediately
-		// if token == "invalid" {
-		// 	c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Invalid token"})
-		// 	return
-		// }
+		_, err := jwtValidator.ValidateToken(context.Background(), tokenString)
+		if err != nil {
+			log.Printf("Token validation failed: %v", err)
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Invalid token"})
+			return
+		}
 
 		c.Next()
 	}
+}
+
+type CustomClaims struct {
+	Scope string `json:"scope"`
+}
+
+func (c *CustomClaims) Validate(ctx context.Context) error {
+	return nil
 }

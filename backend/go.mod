@@ -7,6 +7,7 @@ toolchain go1.24.2
 require github.com/gin-gonic/gin v1.11.0
 
 require (
+	github.com/auth0/go-jwt-middleware/v2 v2.3.0 // indirect
 	github.com/bytedance/sonic v1.14.0 // indirect
 	github.com/bytedance/sonic/loader v0.3.0 // indirect
 	github.com/cloudwego/base64x v0.1.6 // indirect
@@ -38,4 +39,5 @@ require (
 	golang.org/x/text v0.27.0 // indirect
 	golang.org/x/tools v0.34.0 // indirect
 	google.golang.org/protobuf v1.36.9 // indirect
+	gopkg.in/go-jose/go-jose.v2 v2.6.3 // indirect
 )

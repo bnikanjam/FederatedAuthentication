@@ -9,11 +9,12 @@ export const appConfig: ApplicationConfig = {
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes),
     provideAuth0({
-      domain: 'YOUR_AUTH0_DOMAIN',
-      clientId: 'YOUR_AUTH0_CLIENT_ID',
+      domain: 'dev-bnik.us.auth0.com',
+      clientId: '6DUcggvMzHN8HcWJ1JnlC9femCBeafhk',
       authorizationParams: {
         redirect_uri: window.location.origin,
-        audience: 'YOUR_AUTH0_AUDIENCE',
+        audience: 'https://fedauthoneapi/',
+        organization: 'org_sj9RwGU8QqHNNKtX',
       },
     }),
   ]
