@@ -47,10 +47,10 @@ export class LoginComponent {
 
         const domain = this.email.split('@')[1];
 
-        // Load the Org Map
-        this.http.get<any>('/assets/org-map.json').subscribe({
-            next: (orgMap) => {
-                const orgId = orgMap[domain];
+        // Call Backend API for Organization Lookup
+        this.http.get<any>(`http://localhost:8080/api/directory/lookup?domain=${domain}`).subscribe({
+            next: (response) => {
+                const orgId = response.organization_id;
 
                 if (orgId) {
                     // Dynamic Login with Organization ID

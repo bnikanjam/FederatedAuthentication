@@ -16,6 +16,8 @@ func SetupRoutes(r *gin.Engine, auth AuthMiddleware) {
 		c.JSON(http.StatusOK, gin.H{"status": "ok"})
 	})
 
+	r.GET("/api/directory/lookup", GetOrganizationByDomain)
+
 	// Protected Routes
 	protected := r.Group("/api")
 	protected.Use(auth.ValidateToken())

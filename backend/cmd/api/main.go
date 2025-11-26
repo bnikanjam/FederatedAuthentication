@@ -2,6 +2,7 @@ package main
 
 import (
 	"federation-auth/internal/api"
+	"federation-auth/internal/db"
 	"federation-auth/internal/middleware"
 	"log"
 	"os"
@@ -10,7 +11,11 @@ import (
 )
 
 func main() {
+	// Initialize Database
+	db.InitDB()
+
 	r := gin.Default()
+	r.Use(middleware.CORSMiddleware())
 
 	// Middleware
 	authMiddleware := middleware.NewAuthMiddleware(
