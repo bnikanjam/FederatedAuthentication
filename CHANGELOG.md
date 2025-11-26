@@ -10,6 +10,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.2.0] - 2024-07-26
 
 ### Added
+- **Phase 2: Dynamic Org & Multi-IdP Simulation Complete**:
+    - **Dynamic Discovery**: Implemented `LoginComponent` to route users to the correct Auth0 Organization based on email domain.
+    - **Multi-IdP Simulation**: Refactored Terraform to provision 5 distinct Organizations (LDAP, Azure, Okta, Google, SAML) with simulated connections.
+    - **Policy Enforcement**: Enforced "Existing Users Only" by disabling signups on all simulated connections.
+    - **Verification**: Validated end-to-end login flow for `alice@azure-corp.com` and confirmed absence of signup option.
 - **Phase 1 MVP Complete**:
     - **Frontend**: Angular SPA with Auth0 SDK integration.
     - **Backend**: Go API with Auth0 JWT Middleware for protected routes.
@@ -20,10 +25,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - `implementation_plan.md`: Updated with Phase 2 roadmap (Dynamic Org & Multi-IdP).
     - `troubleshooting.md`: Added guides for common Auth0 errors (Service Not Found, Org Required).
     - `walkthrough.md`: Verification steps for the current build.
+    - `docs/architecture.md`: Added system architecture and sequence diagrams.
 
 ### Changed
-- Updated `app.config.ts` to include `organization` parameter for B2B login support.
-- Configured Frontend Dockerfile for multi-stage build (Node -> Nginx).
+- Refactored `frontend/src/app/app.component.ts` to support routing and dynamic login.
+- Updated `frontend/src/app/app.config.ts` to remove hardcoded organization ID.
+- Updated `frontend/angular.json` to include `src/assets` in build output.
+- Updated `terraform/main.tf` to use `for_each` for dynamic resource creation and added a test user.
 
 ## [0.1.0] - 2025-11-19
 

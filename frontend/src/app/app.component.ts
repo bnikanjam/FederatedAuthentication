@@ -15,22 +15,24 @@ import { AuthService } from '@auth0/auth0-angular';
           <p>Welcome, {{ user.name }}</p>
           <button (click)="logout()">Log out</button>
         </div>
-        <div *ngIf="(auth.isAuthenticated$ | async) === false">
-          <button (click)="login()">Log in</button>
-        </div>
       </header>
 
       <main>
-        <div *ngIf="auth.user$ | async as user">
-          <h2>User Profile</h2>
-          <pre>{{ user | json }}</pre>
-          
-          <button (click)="callApi()">Call Protected API</button>
-          <div *ngIf="apiResponse">
-            <h3>API Response:</h3>
-            <pre>{{ apiResponse | json }}</pre>
+        <ng-container *ngIf="auth.isAuthenticated$ | async; else loginRoute">
+          <div *ngIf="auth.user$ | async as user">
+            <h2>User Profile</h2>
+            <pre>{{ user | json }}</pre>
+            
+            <button (click)="callApi()">Call Protected API</button>
+            <div *ngIf="apiResponse">
+              <h3>API Response:</h3>
+              <pre>{{ apiResponse | json }}</pre>
+            </div>
           </div>
-        </div>
+        </ng-container>
+        <ng-template #loginRoute>
+          <router-outlet></router-outlet>
+        </ng-template>
       </main>
     </div>
   `,
@@ -49,9 +51,7 @@ export class AppComponent {
     public auth: AuthService
   ) { }
 
-  login() {
-    this.auth.loginWithPopup().subscribe();
-  }
+
 
   logout() {
     this.auth.logout({

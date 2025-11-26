@@ -17,31 +17,93 @@ variable "auth0_domain" {}
 variable "auth0_client_id" {}
 variable "auth0_client_secret" {}
 
-# 1. Create the Organization
-resource "auth0_organization" "test_biz" {
-  name         = "test-biz"
-  display_name = "Test Business Inc."
+# Define the organizations and their simulated IdP types
+locals {
+  organizations = {
+    "ldap-corp" = {
+      domain       = "ldap-corp.com"
+      display_name = "LDAP Corp (Simulated)"
+      conn_name    = "sim-ldap-conn"
+    },
+    "azure-corp" = {
+      domain       = "azure-corp.com"
+      display_name = "Azure Corp (Simulated)"
+      conn_name    = "sim-azure-conn"
+    },
+    "okta-corp" = {
+      domain       = "okta-corp.com"
+      display_name = "Okta Corp (Simulated)"
+      conn_name    = "sim-okta-conn"
+    },
+    "google-corp" = {
+      domain       = "google-corp.com"
+      display_name = "Google Corp (Simulated)"
+      conn_name    = "sim-google-conn"
+    },
+    "saml-corp" = {
+      domain       = "saml-corp.com"
+      display_name = "SAML Corp (Simulated)"
+      conn_name    = "sim-saml-conn"
+    }
+  }
+}
+
+# 1. Create Organizations
+resource "auth0_organization" "orgs" {
+  for_each     = local.organizations
+  name         = each.key
+  display_name = each.value.display_name
   branding {
     logo_url = "https://example.com/logo.png"
   }
 }
 
-# 2. Create the Connection (Simulated LDAP via Custom DB or just Username-Password for now)
-# Note: Real LDAP requires the Auth0 Connector to be installed on your infrastructure.
-# For this MVP, we'll use a standard DB connection to simulate the "Own IdP".
-resource "auth0_connection" "ldap_sim" {
-  name     = "ldap-sim-connection"
-  strategy = "auth0" # Using standard DB for simplicity in Terraform, swap to 'ad' or 'ldap' if connector is ready
+# 2. Create Simulated Connections (Auth0 DBs)
+resource "auth0_connection" "conns" {
+  for_each = local.organizations
+  name     = each.value.conn_name
+  strategy = "auth0" # Simulating external IdPs with internal DBs for now
+
+  options {
+    disable_signup = true
+  }
 }
 
-# 3. Enable the Connection for the Organization
-resource "auth0_organization_connection" "test_biz_conn" {
-  organization_id = auth0_organization.test_biz.id
-  connection_id   = auth0_connection.ldap_sim.id
+resource "auth0_connection_clients" "enable_clients" {
+  for_each      = auth0_connection.conns
+  connection_id = each.value.id
+  enabled_clients = [
+    var.auth0_client_id,               # M2M App (Terraform)
+    "6DUcggvMzHN8HcWJ1JnlC9femCBeafhk" # Angular Frontend
+  ]
+}
+
+# 3. Link Connection to Organization
+resource "auth0_organization_connection" "org_conns" {
+  for_each = local.organizations
+  
+  organization_id = auth0_organization.orgs[each.key].id
+  connection_id   = auth0_connection.conns[each.key].id
+  
   assign_membership_on_login = true
 }
 
-# Output the Org ID for Angular
-output "organization_id" {
-  value = auth0_organization.test_biz.id
+# 4. Create a Test User for Verification
+resource "auth0_user" "alice_azure" {
+  connection_name = "sim-azure-conn"
+  email           = "alice@azure-corp.com"
+  password        = "Password123!" # Simple password for testing
+  email_verified  = true
+  
+  depends_on = [
+    auth0_connection.conns,
+    auth0_connection_clients.enable_clients
+  ]
+}
+
+# Output the Map for Frontend
+output "org_map" {
+  value = {
+    for k, v in local.organizations : v.domain => auth0_organization.orgs[k].id
+  }
 }
