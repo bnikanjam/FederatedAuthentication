@@ -10,6 +10,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.2.0] - 2024-07-26
 
 ### Added
+- **Phase 3: Backend Discovery API Complete**:
+    - **Backend API**: Implemented `/api/directory/lookup` endpoint using Gin and GORM.
+    - **Database**: Configured Azure SQL Edge with `Organizations` table, auto-migration, and seeding.
+    - **Frontend**: Updated `LoginComponent` to fetch organization ID from the backend API.
+    - **Infrastructure**: Resolved SQL Server TLS and volume issues; added CORS middleware.
 - **Phase 2: Dynamic Org & Multi-IdP Simulation Complete**:
     - **Dynamic Discovery**: Implemented `LoginComponent` to route users to the correct Auth0 Organization based on email domain.
     - **Multi-IdP Simulation**: Refactored Terraform to provision 5 distinct Organizations (LDAP, Azure, Okta, Google, SAML) with simulated connections.
