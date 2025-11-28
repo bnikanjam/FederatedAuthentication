@@ -19,7 +19,7 @@ graph TD
 
     subgraph "External Services"
         Auth0[Auth0 Tenant]
-        AzureAD[Azure Entra ID\n(Real IdP)]
+        AzureAD[Azure Entra ID - Real IdP]
         Terraform[Terraform Cloud/Local]
     end
 
