@@ -88,6 +88,7 @@ func seedData() {
 		{Domain: "ldap-corp.com", Auth0OrgID: "org_fDx7gecDJ4hAmKDu", DisplayName: "LDAP Corp"},
 		{Domain: "okta-corp.com", Auth0OrgID: "org_5DnOZCUZyLy2f8sT", DisplayName: "Okta Corp"},
 		{Domain: "saml-corp.com", Auth0OrgID: "org_wtg281Bn9Lb3oaXn", DisplayName: "SAML Corp"},
+		{Domain: "ba2kxoutlook.onmicrosoft.com", Auth0OrgID: "org_OqugCGseq85xF0rm", DisplayName: "Real Azure Corp"},
 	}
 
 	for _, org := range orgs {

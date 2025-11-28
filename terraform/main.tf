@@ -17,6 +17,9 @@ variable "auth0_domain" {}
 variable "auth0_client_id" {}
 variable "auth0_client_secret" {}
 
+variable "azure_client_id" {}
+variable "azure_client_secret" {}
+
 # Define the organizations and their simulated IdP types
 locals {
   organizations = {
@@ -44,6 +47,11 @@ locals {
       domain       = "saml-corp.com"
       display_name = "SAML Corp (Simulated)"
       conn_name    = "sim-saml-conn"
+    },
+    "real-azure-corp" = {
+      domain       = "ba2kxoutlook.onmicrosoft.com"
+      display_name = "Real Azure Corp"
+      conn_name    = "real-azure-ad-conn"
     }
   }
 }
@@ -58,14 +66,33 @@ resource "auth0_organization" "orgs" {
   }
 }
 
-# 2. Create Simulated Connections (Auth0 DBs)
+# 2. Create Connections (Simulated & Real)
 resource "auth0_connection" "conns" {
   for_each = local.organizations
   name     = each.value.conn_name
-  strategy = "auth0" # Simulating external IdPs with internal DBs for now
+  
+  # Use 'waad' for the real Azure connection, 'auth0' for simulations
+  strategy = each.key == "real-azure-corp" ? "waad" : "auth0"
 
-  options {
-    disable_signup = true
+  # Options for Real Azure AD
+  dynamic "options" {
+    for_each = each.key == "real-azure-corp" ? [1] : []
+    content {
+      client_id     = var.azure_client_id
+      client_secret = var.azure_client_secret
+      domain        = "ba2kxoutlook.onmicrosoft.com" # Your Azure Tenant Domain
+      tenant_domain = "ba2kxoutlook.onmicrosoft.com" # Your Azure Tenant Domain
+      waad_protocol = "openid-connect"
+      identity_api  = "microsoft-identity-platform-v2.0"
+    }
+  }
+
+  # Options for Simulated Connections
+  dynamic "options" {
+    for_each = each.key != "real-azure-corp" ? [1] : []
+    content {
+      disable_signup = true
+    }
   }
 }
 
